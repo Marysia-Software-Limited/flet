@@ -29,3 +29,7 @@ vendor/
 
 # pyCharm and ItelliJ
 .idea
+.run
+
+# ignore testing and examples applications
+__testing_*.py
