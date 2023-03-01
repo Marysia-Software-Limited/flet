@@ -144,9 +144,12 @@ class _TableCalendarControlState extends State<TableCalendarControl> {
                     _selectedEvents.value = _getEventsForDay(selectedDay);
                   }
 
-                  String modeValue = RangeSelectionMode.toggledOff.toString();
                   List<Map<String, String>> props = [
-                    {"i": widget.control.id, "rangeSelectionMode": modeValue}
+                    {
+                      "i": widget.control.id,
+                      "selectedDay": selectedDay.toIso8601String(),
+                      "focusedDay": focusedDay.toIso8601String(),
+                    }
                   ];
                   dispatch(UpdateControlPropsAction(
                       UpdateControlPropsPayload(props: props)));
@@ -154,12 +157,11 @@ class _TableCalendarControlState extends State<TableCalendarControl> {
                       .server
                       .updateControlProps(props: props);
 
-                  String stringValue = selectedDay.toIso8601String();
                   if (onDaySelected) {
                     FletAppServices.of(context).server.sendPageEvent(
                         eventTarget: widget.control.id,
                         eventName: "daySelected",
-                        eventData: stringValue);
+                        eventData: selectedDay.toIso8601String());
                   }
                 }
 
@@ -174,7 +176,11 @@ class _TableCalendarControlState extends State<TableCalendarControl> {
 
                   String stringValue = RangeSelectionMode.toggledOn.toString();
                   List<Map<String, String>> props = [
-                    {"i": widget.control.id, "rangeSelectionMode": stringValue}
+                    {
+                      "i": widget.control.id,
+                      "rangeSelectionMode": stringValue,
+                      "focusedDay": focusedDay.toIso8601String(),
+                    }
                   ];
                   dispatch(UpdateControlPropsAction(
                       UpdateControlPropsPayload(props: props)));
@@ -205,7 +211,10 @@ class _TableCalendarControlState extends State<TableCalendarControl> {
                 void _onFormatChanged(format) {
                   String stringValue = format.toString();
                   List<Map<String, String>> props = [
-                    {"i": widget.control.id, "calendarFormat": stringValue}
+                    {
+                      "i": widget.control.id,
+                      "calendarFormat": stringValue
+                    }
                   ];
                   dispatch(UpdateControlPropsAction(
                       UpdateControlPropsPayload(props: props)));
@@ -221,7 +230,22 @@ class _TableCalendarControlState extends State<TableCalendarControl> {
                 }
 
                 void _onPageChanged(focusedDay) {
-                  _focusedDay = focusedDay;
+                  setState(() {
+                    _focusedDay = focusedDay;
+                  });
+
+                  List<Map<String, String>> props = [
+                    {
+                      "i": widget.control.id,
+                      "selectedDay": focusedDay.toIso8601String(),
+                      "focusedDay": focusedDay.toIso8601String(),
+                    }
+                  ];
+                  dispatch(UpdateControlPropsAction(
+                      UpdateControlPropsPayload(props: props)));
+                  FletAppServices.of(context)
+                      .server
+                      .updateControlProps(props: props);
                   String stringValue = focusedDay.toIso8601String() ?? "";
                   if (onPageChanged) {
                     FletAppServices.of(context).server.sendPageEvent(
